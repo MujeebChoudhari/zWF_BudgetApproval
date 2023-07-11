@@ -1,0 +1,11 @@
+<mvc:View controllerName="testing.workflowuimodule.controller.ApproveBGD" xmlns:mvc="sap.ui.core.mvc" displayBlock="true" xmlns="sap.m">
+    <App id="app">
+        <pages>
+            <Page id="page" title="Testing" showHeader="false" showFooter="false">
+                <content>
+                    <Input value="TESTING" id="__input0"/>
+                </content>
+            </Page>
+        </pages>
+    </App>
+</mvc:View>

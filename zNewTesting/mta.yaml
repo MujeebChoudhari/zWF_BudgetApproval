@@ -1,0 +1,108 @@
+_schema-version: "3.2"
+ID: zNewTesting
+version: 0.0.1
+modules:
+- name: zNewTesting-destination-content
+  type: com.sap.application.content
+  requires:
+  - name: zNewTesting-destination-service
+    parameters:
+      content-target: true
+  - name: zNewTesting_html_repo_host
+    parameters:
+      service-key:
+        name: zNewTesting_html_repo_host-key
+  - name: uaa_zNewTesting
+    parameters:
+      service-key:
+        name: uaa_zNewTesting-key
+  parameters:
+    content:
+      subaccount:
+        destinations:
+        - Name: zUI_zNewTesting_html_repo_host
+          ServiceInstanceName: zNewTesting-html5-app-host-service
+          ServiceKeyName: zNewTesting_html_repo_host-key
+          sap.cloud.service: zUI
+        - Authentication: OAuth2UserTokenExchange
+          Name: zUI_uaa_zNewTesting
+          ServiceInstanceName: zNewTesting-xsuaa-service
+          ServiceKeyName: uaa_zNewTesting-key
+          sap.cloud.service: zUI
+        existing_destinations_policy: ignore
+  build-parameters:
+    no-source: true
+- name: zNewTesting-app-content
+  type: com.sap.application.content
+  path: .
+  requires:
+  - name: zNewTesting_html_repo_host
+    parameters:
+      content-target: true
+  build-parameters:
+    build-result: resources
+    requires:
+    - artifacts:
+      - testingworkflowuimodule.zip
+      name: testingworkflowuimodule
+      target-path: resources/
+- name: testingworkflowuimodule
+  type: html5
+  path: workflow-ui-module
+  build-parameters:
+    build-result: dist
+    builder: custom
+    commands:
+    - npm install
+    - npm run build:cf
+    supported-platforms: []
+- name: workflow-module
+  type: com.sap.application.content
+  path: workflow-module
+  requires:
+  - name: sap_processautomation
+    parameters:
+      content-target: true
+      service-key:
+        config:
+          deployUsageScenario: workflow
+        name: spa-workflow-service-key
+resources:
+- name: zNewTesting-destination-service
+  type: org.cloudfoundry.managed-service
+  parameters:
+    config:
+      HTML5Runtime_enabled: true
+      init_data:
+        subaccount:
+          destinations:
+          - Authentication: NoAuthentication
+            Name: ui5
+            ProxyType: Internet
+            Type: HTTP
+            URL: https://ui5.sap.com
+          existing_destinations_policy: update
+      version: 1.0.0
+    service: destination
+    service-name: zNewTesting-destination-service
+    service-plan: lite
+- name: zNewTesting_html_repo_host
+  type: org.cloudfoundry.managed-service
+  parameters:
+    service: html5-apps-repo
+    service-name: zNewTesting-html5-app-host-service
+    service-plan: app-host
+- name: uaa_zNewTesting
+  type: org.cloudfoundry.managed-service
+  parameters:
+    path: ./xs-security.json
+    service: xsuaa
+    service-name: zNewTesting-xsuaa-service
+    service-plan: application
+- name: sap_processautomation
+  type: org.cloudfoundry.managed-service
+  parameters:
+    service: process-automation-service
+    service-plan: standard
+parameters:
+  deploy_mode: html5-repo

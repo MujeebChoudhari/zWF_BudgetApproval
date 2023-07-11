@@ -1,0 +1,15 @@
+<mvc:View controllerName="zbudgetapp.uimodule.controller.BudgetApp"
+    xmlns:mvc="sap.ui.core.mvc" displayBlock="true"
+    xmlns="sap.m">
+    <Page id="page" title="{i18n>title}">
+        <content>
+        <VBox width="100%" direction="Column" id="__vbox0">
+            <items>
+                <Input width="100%" id="textInput" value=""/>
+                <Button text="Start Workflow" width="100px" id="__button0" press="startWorkflow"/>
+                <Text text="TEST APP" maxLines="0" id="__text0"/>
+            </items>
+        </VBox>
+        </content>
+    </Page>
+</mvc:View>

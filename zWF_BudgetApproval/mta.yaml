@@ -1,0 +1,21 @@
+_schema-version: "3.2"
+ID: zWF_BudgetApproval
+version: 0.0.1
+modules:
+- name: workflow-module
+  type: com.sap.application.content
+  path: workflow-module
+  requires:
+  - name: default_workflow
+    parameters:
+      content-target: true
+      service-key:
+        config:
+          deployUsageScenario: workflow
+        name: spa-workflow-service-key
+resources:
+- name: default_workflow
+  type: org.cloudfoundry.existing-service
+  parameters:
+    service: Workflow
+    service-plan: standard

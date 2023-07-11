@@ -1,0 +1,109 @@
+_schema-version: "3.2"
+ID: zWF_BudgetApp
+description: Fiori app
+version: 0.0.1
+modules:
+- name: workflow-module
+  type: com.sap.application.content
+  path: workflow-module
+  requires:
+  - name: sap_processautomation
+    parameters:
+      content-target: true
+      service-key:
+        config:
+          deployUsageScenario: workflow
+        name: spa-workflow-service-key
+- name: zWF_BudgetApp-dest-content
+  type: com.sap.application.content
+  requires:
+  - name: zWF_BudgetApp-destination-service
+    parameters:
+      content-target: true
+  - name: zWF_BudgetApp-repo-host
+    parameters:
+      service-key:
+        name: zWF_BudgetApp-repo-host-key
+  - name: zWF_BudgetApp-uaa
+    parameters:
+      service-key:
+        name: zWF_BudgetApp-uaa-key
+  parameters:
+    content:
+      instance:
+        destinations:
+        - Name: zWF_BudgetApp_repo_host
+          ServiceInstanceName: zWF_BudgetApp-html5-srv
+          ServiceKeyName: zWF_BudgetApp-repo-host-key
+          sap.cloud.service: zWF_BudgetApp
+        - Authentication: OAuth2UserTokenExchange
+          Name: zWF_BudgetApp_uaa
+          ServiceInstanceName: zWF_BudgetApp-xsuaa-srv
+          ServiceKeyName: zWF_BudgetApp-uaa-key
+          sap.cloud.service: zWF_BudgetApp
+        existing_destinations_policy: update
+  build-parameters:
+    no-source: true
+- name: zWF_BudgetApp-app-content
+  type: com.sap.application.content
+  path: .
+  requires:
+  - name: zWF_BudgetApp-repo-host
+    parameters:
+      content-target: true
+  build-parameters:
+    build-result: resources
+    requires:
+    - artifacts:
+      - zbudgetappuimodule.zip
+      name: zbudgetappuimodule
+      target-path: resources/
+- name: zbudgetappuimodule
+  type: html5
+  path: ui-module
+  build-parameters:
+    build-result: dist
+    builder: custom
+    commands:
+    - npm install
+    - npm run build:cf
+    supported-platforms: []
+resources:
+- name: sap_processautomation
+  type: org.cloudfoundry.managed-service
+  parameters:
+    service: process-automation-service
+    service-plan: standard
+- name: zWF_BudgetApp-uaa
+  type: org.cloudfoundry.managed-service
+  parameters:
+    path: ./xs-security.json
+    service: xsuaa
+    service-name: zWF_BudgetApp-xsuaa-srv
+    service-plan: application
+- name: zWF_BudgetApp-destination-service
+  type: org.cloudfoundry.managed-service
+  parameters:
+    config:
+      HTML5Runtime_enabled: false
+      init_data:
+        instance:
+          destinations:
+          - Authentication: NoAuthentication
+            Name: ui5
+            ProxyType: Internet
+            Type: HTTP
+            URL: https://ui5.sap.com
+          existing_destinations_policy: update
+      version: 1.0.0
+    service: destination
+    service-name: zWF_BudgetApp-destination-service
+    service-plan: lite
+- name: zWF_BudgetApp-repo-host
+  type: org.cloudfoundry.managed-service
+  parameters:
+    service: html5-apps-repo
+    service-name: zWF_BudgetApp-html5-srv
+    service-plan: app-host
+parameters:
+  deploy_mode: html5-repo
